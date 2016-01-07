@@ -10,6 +10,18 @@ type SerialDispatcher struct {
 	handlers []Handler
 }
 
+func (d *SerialDispatcher) AppendHandlers(handlers ...Handler) {
+Loop:
+	for _, newHandler := range handlers {
+		for _, existingHandler := range d.handlers {
+			if newHandler == existingHandler {
+				break Loop
+			}
+		}
+		d.handlers = append(d.handlers, newHandler)
+	}
+}
+
 func (d *SerialDispatcher) Dispatch(cmd interface{}) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
