@@ -1,16 +1,23 @@
 package command
 
+import "sync"
+
 func NewSerialDispatcher(handlers []Handler) Dispatcher {
 	return &SerialDispatcher{
 		handlers: handlers,
+		mutex:    sync.RWMutex{},
 	}
 }
 
 type SerialDispatcher struct {
 	handlers []Handler
+	mutex    sync.RWMutex
 }
 
 func (d *SerialDispatcher) AppendHandlers(handlers ...Handler) {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
 Loop:
 	for _, newHandler := range handlers {
 		for _, existingHandler := range d.handlers {
@@ -23,6 +30,9 @@ Loop:
 }
 
 func (d *SerialDispatcher) Dispatch(cmd interface{}) (err error) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
@@ -53,6 +63,9 @@ func (d *SerialDispatcher) Dispatch(cmd interface{}) (err error) {
 }
 
 func (d *SerialDispatcher) DispatchOptional(cmd interface{}) (err error) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
