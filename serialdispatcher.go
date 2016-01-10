@@ -22,7 +22,7 @@ Loop:
 	for _, newHandler := range handlers {
 		for _, existingHandler := range d.handlers {
 			if newHandler == existingHandler {
-				break Loop
+				continue Loop
 			}
 		}
 		d.handlers = append(d.handlers, newHandler)
