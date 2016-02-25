@@ -2,6 +2,7 @@ package command
 
 import "sync"
 
+// NewParallelDispatcher creates a new PrallelDispatcher with the given handlers
 func NewParallelDispatcher(handlers []Handler) Dispatcher {
 	return &ParallelDispatcher{
 		handlers: handlers,
@@ -9,6 +10,13 @@ func NewParallelDispatcher(handlers []Handler) Dispatcher {
 	}
 }
 
+// ParallelDispatcher is a command dispatcher wich will run all handlers in
+// parallel and wait all handlers to finish before returning.
+//
+// All errors returned by the handlers will be grouped in a `ErrorGroup`
+// instance.
+//
+// This dispatcher is *thread safe*.
 type ParallelDispatcher struct {
 	handlers []Handler
 	mutex    sync.RWMutex

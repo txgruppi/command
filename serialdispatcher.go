@@ -2,6 +2,7 @@ package command
 
 import "sync"
 
+// NewSerialDispatcher creates a new PrallelDispatcher with the given handlers
 func NewSerialDispatcher(handlers []Handler) Dispatcher {
 	return &SerialDispatcher{
 		handlers: handlers,
@@ -9,6 +10,13 @@ func NewSerialDispatcher(handlers []Handler) Dispatcher {
 	}
 }
 
+// SerialDispatcher is a command dispatcher wich will run all handlers in
+// parallel and wait all handlers to finish before returning.
+//
+// If any handler returns an error the dispatcher will stop execution and will
+// return that error.
+//
+// This dispatcher is *thread safe*.
 type SerialDispatcher struct {
 	handlers []Handler
 	mutex    sync.RWMutex
