@@ -1,6 +1,9 @@
 package command
 
-import "sync"
+import (
+	"sync"
+	"sync/atomic"
+)
 
 // NewParallelDispatcher creates a new PrallelDispatcher with the given handlers
 func NewParallelDispatcher(handlers []Handler) Dispatcher {
@@ -47,27 +50,22 @@ func (d *ParallelDispatcher) Dispatch(cmd interface{}) (err error) {
 		}
 	}()
 
-	var wg sync.WaitGroup
+	var found int32
+	wg := &sync.WaitGroup{}
 	errCh := make(chan error, len(d.handlers))
-	found := false
 	for _, handler := range d.handlers {
-		if !handler.CanHandle(cmd) {
-			continue
-		}
-
-		found = true
 		wg.Add(1)
-		go d.dispatch(&wg, errCh, handler, cmd)
-	}
-
-	if !found {
-		return &NoHandlerFoundError{
-			Command: cmd,
-		}
+		go d.dispatch(wg, errCh, &found, handler, cmd)
 	}
 
 	wg.Wait()
 	close(errCh)
+
+	if found != 1 {
+		return &NoHandlerFoundError{
+			Command: cmd,
+		}
+	}
 
 	errs := []error{}
 	for {
@@ -75,7 +73,14 @@ func (d *ParallelDispatcher) Dispatch(cmd interface{}) (err error) {
 		if !ok {
 			break
 		}
+		if e == nil {
+			continue
+		}
 		errs = append(errs, e)
+	}
+
+	if len(errs) == 0 {
+		return
 	}
 
 	err = &ErrorGroup{
@@ -85,7 +90,7 @@ func (d *ParallelDispatcher) Dispatch(cmd interface{}) (err error) {
 	return
 }
 
-func (d *ParallelDispatcher) dispatch(wg *sync.WaitGroup, errCh chan error, handler Handler, cmd interface{}) {
+func (d *ParallelDispatcher) dispatch(wg *sync.WaitGroup, errCh chan error, found *int32, handler Handler, cmd interface{}) {
 	var err error
 
 	defer func() {
@@ -95,6 +100,12 @@ func (d *ParallelDispatcher) dispatch(wg *sync.WaitGroup, errCh chan error, hand
 		errCh <- err
 		wg.Done()
 	}()
+
+	if !handler.CanHandle(cmd) {
+		return
+	}
+
+	atomic.StoreInt32(found, 1)
 
 	err = handler.Handle(cmd, d)
 }
