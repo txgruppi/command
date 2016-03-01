@@ -103,12 +103,6 @@ func (d *ParallelDispatcher) DispatchOptional(cmd interface{}) (err error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
-	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
-		}
-	}()
-
 	err = d.Dispatch(cmd)
 	switch err.(type) {
 	case *NoHandlerFoundError:
