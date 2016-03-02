@@ -3,6 +3,8 @@ package command
 import (
 	"sync"
 	"sync/atomic"
+
+	"github.com/nproc/errorgroup-go"
 )
 
 // NewParallelDispatcher creates a new PrallelDispatcher with the given handlers
@@ -16,8 +18,8 @@ func NewParallelDispatcher(handlers []Handler) Dispatcher {
 // ParallelDispatcher is a command dispatcher wich will run all handlers in
 // parallel and wait all handlers to finish before returning.
 //
-// All errors returned by the handlers will be grouped in a `ErrorGroup`
-// instance.
+// All errors returned by the handlers will be grouped in a
+// `errorgroup.ErrorGroup`.
 //
 // This dispatcher is *thread safe*.
 type ParallelDispatcher struct {
@@ -83,9 +85,7 @@ func (d *ParallelDispatcher) Dispatch(cmd interface{}) (err error) {
 		return
 	}
 
-	err = &ErrorGroup{
-		Errors: errs,
-	}
+	err = errorgroup.New(errs)
 
 	return
 }

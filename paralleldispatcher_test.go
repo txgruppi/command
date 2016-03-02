@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nproc/errorgroup-go"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/txgruppi/command"
 )
@@ -136,8 +137,8 @@ func TestParallelDispatcher(t *testing.T) {
 				handlerB.CanHandleCallback = NewCanHandleCallbackForCommand(CommandA)
 				err := dispatcher.Dispatch(CommandA)
 				So(err, ShouldNotBeNil)
-				So(err, ShouldHaveSameTypeAs, &command.ErrorGroup{})
-				errGroup := err.(*command.ErrorGroup)
+				So(err, ShouldHaveSameTypeAs, &errorgroup.ErrorGroup{})
+				errGroup := err.(*errorgroup.ErrorGroup)
 				So(len(errGroup.Errors), ShouldEqual, 2)
 				So(errGroup.Errors, ShouldContain, errA)
 				So(errGroup.Errors, ShouldContain, errB)
