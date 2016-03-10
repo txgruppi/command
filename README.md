@@ -13,6 +13,14 @@ Command pattern for Go with **thread safe serial and parallel dispatcher**.
 go get -u github.com/txgruppi/command
 ```
 
+## Tests
+
+```
+go get -u -t github.com/txgruppi/command
+cd $GOPATH/src/github.com/txgruppi/command
+go test ./...
+```
+
 ## License
 
 MIT
