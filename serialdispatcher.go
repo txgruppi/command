@@ -22,6 +22,7 @@ type SerialDispatcher struct {
 	mutex    sync.RWMutex
 }
 
+// AppendHandlers implements `Dispatcher.AppendHandlers`
 func (d *SerialDispatcher) AppendHandlers(handlers ...Handler) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -37,6 +38,7 @@ Loop:
 	}
 }
 
+// Dispatch implements `Dispatcher.Dispatch`
 func (d *SerialDispatcher) Dispatch(cmd interface{}) (err error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
@@ -70,6 +72,7 @@ func (d *SerialDispatcher) Dispatch(cmd interface{}) (err error) {
 	return
 }
 
+// DispatchOptional implements `Dispatcher.DispatchOptional`
 func (d *SerialDispatcher) DispatchOptional(cmd interface{}) (err error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()

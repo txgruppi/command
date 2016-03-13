@@ -27,6 +27,7 @@ type ParallelDispatcher struct {
 	mutex    sync.RWMutex
 }
 
+// AppendHandlers implements `Dispatcher.AppendHandlers`
 func (d *ParallelDispatcher) AppendHandlers(handlers ...Handler) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
@@ -42,6 +43,7 @@ Loop:
 	}
 }
 
+// Dispatch implements `Dispatcher.Dispatch`
 func (d *ParallelDispatcher) Dispatch(cmd interface{}) (err error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
@@ -110,6 +112,7 @@ func (d *ParallelDispatcher) dispatch(wg *sync.WaitGroup, errCh chan error, foun
 	err = handler.Handle(cmd, d)
 }
 
+// DispatchOptional implements `Dispatcher.DispatchOptional`
 func (d *ParallelDispatcher) DispatchOptional(cmd interface{}) (err error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()

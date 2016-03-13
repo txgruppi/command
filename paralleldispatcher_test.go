@@ -123,9 +123,10 @@ func TestParallelDispatcher(t *testing.T) {
 					lock.Lock()
 					defer lock.Unlock()
 					callOrder = append(callOrder, 2)
-					return false
+					return true
 				}
-				dispatcher.Dispatch(CommandB)
+				err := dispatcher.Dispatch(CommandB)
+				So(err, ShouldBeNil)
 				So(callOrder, ShouldResemble, []int{2, 1})
 			})
 
