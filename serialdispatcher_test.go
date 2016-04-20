@@ -93,7 +93,7 @@ func TestSerialDispatcher(t *testing.T) {
 			Convey("it should return an error if no handler can handle the given command", func() {
 				err := dispatcher.Dispatch(CommandC)
 				So(err, ShouldNotBeNil)
-				So(err.Error(), ShouldEqual, "No handler can handle the given command")
+				So(err.Error(), ShouldEqual, "No handler can handle command_test.Command")
 			})
 
 			Convey("it should recover from panic", func() {
